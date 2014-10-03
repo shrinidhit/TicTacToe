@@ -95,19 +95,20 @@ def utility (board):
 
 def min_value (board):
     """Returns the minimum utility possible after a single move"""
+    possibleUtilities = []
     #Checks if game is over and returns utility
     if done(board):
         return utility(board)
     #Else, gets possible moves and moves one move down to repeat
     possibleMoves = possible_moves(board)
     for move in possible_moves(board):
-        newBoard = make_move(board, move, 'X')
-        possibleUtilities = []
+        newBoard = make_move(board, move, 'O')
         possibleUtilities.append(max_value(newBoard))
     #returns minimum utility
     return min(possibleUtilities)
 
 def max_value (board):
+    possibleUtilities = []
     """Returns the maximum utility possible after a single move"""
     #Checks if game is over, and returns utility
     if done(board):
@@ -115,29 +116,28 @@ def max_value (board):
     #Else, gets possible moves and moves one move down to repeat
     possibleMoves = possible_moves(board)
     for move in possible_moves(board):
-        newBoard = make_move(board, move, 'O')
-        possibleUtilities = []
+        newBoard = make_move(board, move, 'X')
         possibleUtilities.append(min_value(newBoard))
     #returns maximum utility
     return max(possibleUtilities)
 
 def best_move (board, player):
     """Returns the best move possible, given a player input"""
-    possibleMoves = {} #Dictionary of all possible move results with the utility as the key and the move as the value
+    possibleDict = {} #Dictionary of all possible move results with the utility as the key and the move as the value
     
-    #Loops through player's move options and adds to dictionary possibleMoves
+    #Loops through player's move options and adds to dictionary possibleDict
     for move in possible_moves(board):
         newBoard = make_move(board, move, player)
         if player == 'X':
-            value = max_value(newBoard)
-        if player == 'O':
             value = min_value(newBoard)
-        possibleMoves[value] = move
+        if player == 'O':
+            value = max_value(newBoard)
+        possibleDict[value] = move
     #Returns best move option for player. Returns move with max utility for X and move with lowest utility for Y
     if player == 'X':
-        return possibleMoves[max(possibleMoves)]
+        return possibleDict[max(possibleDict)]
     else:
-        return possibleMoves[min(possibleMoves)]
+        return possibleDict[min(possibleDict)]
 
 
 #Main Game Loops

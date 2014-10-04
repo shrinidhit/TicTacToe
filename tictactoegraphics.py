@@ -180,11 +180,26 @@ class Display(object):
                 if mark != '.':
                     self.update_mark(mark, (x,y))
 
-    def click_to_string(self):
+    def click_to_string(self, point):
         """Takes in click and outputs move as string"""
-        pass
+        x = int(point.getX())
+        y = int(point.getY())
+        string = str(x) + " " + str(y)
+        return string
+
+    def start_sequence(self):
+        """Displays starting sequence on display Closes on Click"""
+        text = "Welcome! Click on a square to move"
+        Instr = Text(Point(GRID_SIZE/2 + 1, GRID_SIZE/2 + 1), text)
+        Instr.setSize(20)
+        Instr.setTextColor('red')
+        Instr.setStyle('bold')
+        Instr.draw(self.win)
+        self.win.getMouse()
+        Instr.undraw()
 
     def end_sequence(self, winner):
+        """Displays end sequence on display. Shows who won, or a draw"""
         if winner:
             text = winner + " wins!"
         else:
@@ -194,7 +209,8 @@ class Display(object):
         Wintext.setTextColor('red')
         Wintext.setStyle('bold')
         Wintext.draw(self.win)
-        time.sleep(10)
+        self.win.getMouse()
+        self.win.close()
 
 
 
@@ -224,17 +240,27 @@ def perform_move(board, movePos, player):
     board[movePos] = player
     return board
 
-def perform_player_move (board, player):
-    """Gets player input, checks if it is valid, and makes move"""
+def get_console_input():
     #Gets string input
     moveString = raw_input('Position as "column row": ')
+    return moveString
+
+def perform_player_move (board, moveString):
+    """Gets player input, checks if it is valid, and returns move as tuple"""
     #Checks if string is Valid, then gets column and row integers
     if is_string_valid(moveString):
         x = int(moveString[0])
         y = int(moveString[2])
-    #Checks if if position is already taken, then performs move and returns board
+    #Checks if if position is already taken, then performs move coordinates
     if is_move_valid(board, x, y):
         return (x,y)
+
+def when_clicked(View, Point):
+    """Converts click to movestring, checks if move is valid, then performs it, and displays it"""
+    moveString = View.click_to_string(Point) ##Gets Click and converts to moveString
+    moveTuple = perform_player_move(View.board, moveString) #Checks if it's valid and converts to moveTuple
+    View.update_mark('X', moveTuple) #Performs move on display and updates View.board
+
 
 
 
@@ -304,17 +330,18 @@ def main ():
     board = create_board(BOARD_TEST)
     View = Display(board)
     View.start_board(board)
+    #Start Sequence
+    View.start_sequence()
     #Gets User input and prints new board
     while not done(board):
-        moveTuple = perform_player_move(board, 'X')
-        board = View.update_mark('X', moveTuple)
+        #Gets Mouse Click and performs move
+        Point = View.win.getMouse()
+        View.win.setMouseHandler(when_clicked(View, Point))
         #Plays computer input if game isn't over
         if not done(board):
             moveIndex = best_move(board,'O')
-            print moveIndex
             moveTuple = index_to_tuple(moveIndex)
-            print 'Computer moves to', moveTuple
-            board = View.update_mark('O', moveTuple)
+            View.update_mark('O', moveTuple)
     #Checks who has won, and prints result
     winner = has_win(board)
     View.end_sequence(winner)

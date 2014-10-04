@@ -184,6 +184,20 @@ class Display(object):
         """Takes in click and outputs move as string"""
         pass
 
+    def end_sequence(self, winner):
+        if winner:
+            text = winner + " wins!"
+        else:
+            text = "Draw. Game Over"
+        Wintext = Text(Point(GRID_SIZE/2 + 1, GRID_SIZE/2 + 1), text)
+        Wintext.setSize(36)
+        Wintext.setTextColor('red')
+        Wintext.setStyle('bold')
+        Wintext.draw(self.win)
+        time.sleep(10)
+
+
+
 
 
 #Player Input Functions. Checking player input and performing move
@@ -303,10 +317,7 @@ def main ():
             board = View.update_mark('O', moveTuple)
     #Checks who has won, and prints result
     winner = has_win(board)
-    if winner:
-        print winner,'wins!'
-    else:
-        print 'Draw'
+    View.end_sequence(winner)
 
 if __name__ == "__main__":
     main()

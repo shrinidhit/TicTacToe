@@ -54,7 +54,7 @@ def print_board (board):
     """Prints board with empty spaces displayed as "_" """
     for i in range(0,3):
         print '  ', board[i*3],board[i*3+1],board[i*3+2]
-    print
+    print ""
 
 
 def read_player_input (board):

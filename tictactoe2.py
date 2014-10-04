@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-
+#Shrinidhi Thirumalai
 
 # Game Programming, Level 2 Project
-# TIC-TAC-TOE 4
+# TIC-TAC-TOE 4, with an AI implemented
 # A simple strategy game, an extension of the standard 3x3 tic-tac-toe
 
 
@@ -25,10 +25,13 @@ WIN_SEQUENCES = [
     [3,6,9,12],
 ]
 
+#Functions
 def fail (msg):
+    """Graceful Fail with error message"""
     raise StandardError(msg)
 
 def mark_value (markString):
+    """Returns Mark Value of String. Value is used in detecting wins"""
     markValue = {
         'O': 1,
         '.': 0,
@@ -37,13 +40,12 @@ def mark_value (markString):
     return markValue[markString]
 
 def create_board (boardString):
-    # Take a description of the board as input and create the board
-    #  in your representation
-    # The string description is a sequence of 16 characters,
+    """Take a description of the board a string input( a sequence of X's, O's, and .s )
+    and outputs the board as a list of letters. 'X' is player X, '.' is a space, and 'O' is Player O"""
+    # The string description is a sequence of Grid size times Grid size characters,
     #   each either X or O, or . to represent a free space
     # It is allowed to pass in a string describing a board
-    #   that would never arise in legal play starting from an empty
-    #   board
+    #   that would never arise in legal play starting from an empty board
     board = []
     boardLength = GRID_SIZE * GRID_SIZE
     for i in range(boardLength):
@@ -51,30 +53,26 @@ def create_board (boardString):
     return board
 
 def get_mark (board,x,y):
-    # Take a board representation and checks if there's a mark at
-    #    position x, y (each between 1 and 4)
-    # Return 'X' or 'O' if there is a mark
-    # Return False if there is not
+    """Take a board representation and checks if there's a mark at position x, y (each between 1 and GRID_SIZE)
+    Return 'X' or 'O' if there is a mark, and returns False if there is not"""
     index = ((x - 1)*GRID_SIZE) + (y - 1)
     return board[index]
 
 def get_row (board, row):
+    """Returns positions of a row as a list"""
     indexes = range((row-1)*GRID_SIZE, (row-1)*GRID_SIZE + GRID_SIZE)
-    return (board[index] for index in indexes)
+    return indexes
 
 def get_column (board, col):
+    """Returns positions of a column as a list"""
     indexes = range(col-1, GRID_SIZE*GRID_SIZE, GRID_SIZE)
-    return (board[index] for index in indexes)
+    return indexes
 
 def has_win (board):
-    # FIX ME
-    # 
-    # Check if a board is a win for X or for O.
-    # Return 'X' if it is a win for X, 'O' if it is a win for O,
-    # and False otherwise
-
+    """Checks if a board is a win for X or for O.
+    Return 'X' if it is a win for X, 'O' if it is a win for O, and False otherwise"""
     for sequence in WIN_SEQUENCES:
-        total = sum(mark_value(board(pos)) for pos in sequence)
+        total = sum(mark_value(board[pos]) for pos in sequence)
     if total == 0:
         return False
     if total == 1*GRID_SIZE:
@@ -83,24 +81,26 @@ def has_win (board):
         return 'X'
 
 def is_full (board):
+    """Checks if board is full"""
     if '.' not in board:
         return True
     else:
         return False
 
 def done (board):
-    # Check if the board is done, either because it is a win or a draw
+    """Checks if game is over. This is either full(draw) or a win"""
     return has_win(board) or is_full(board)
 
 def print_board (board):
-    # FIX ME
-    # Display a board on the console
+    """Display a board on the console"""
     for row in range(1, GRID_SIZE + 1):
         for column in range(1, GRID_SIZE + 1):
             print '  ' + get_mark(board, column, row),
         print ''
 
 def is_string_valid(moveString):
+    """Checks if a string input is valid. Row and Column are within grid range, and separated by a space.
+    Returns true if valid, and all other inputs throw an error"""
     if len(moveString) != 3 or moveString[1] != ' ':
         fail('Invalid Input. Enter as "column row"')
     elif int(moveString[0]) not in range(1, GRID_SIZE + 1) or int(moveString[2]) not in range(1, GRID_SIZE + 1):
@@ -108,16 +108,20 @@ def is_string_valid(moveString):
     else: return True
 
 def is_move_valid(board, x, y):
+    """Checks if move is valid on board(if the position is already taken). Throws error if false, or returns true
+    if valid"""
     mark = get_mark(board, x, y)
     if mark != '.':
         fail('Position is already taken')
     else: return True
 
 def perform_move(board, movePos, player):
+    """Takes move position, player, and board, then makes move"""
     board[movePos] = player
     return board
 
 def perform_player_move (board, player):
+    """Gets player input, checks if it is valid, and makes move"""
     #Gets string input
     moveString = raw_input('Position as "column row": ')
     #Checks if string is Valid, then gets column and row integers
@@ -131,11 +135,16 @@ def perform_player_move (board, player):
         return board
 
 def main ():
+    """Main Game Loop"""
+    #Creates and prints initial board
     board = create_board(INITIAL_BOARD)
     print_board(board)
+    #Gets User input and prints new board
+    while not done(board):
+        board = perform_player_move(board, 'X')
+        print_board(board)
+        #Plays computer input
 
-    board = perform_player_move(board, 'X')
-    print_board(board)
 
 if __name__ == "__main__":
     main()

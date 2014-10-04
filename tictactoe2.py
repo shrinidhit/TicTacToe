@@ -10,20 +10,30 @@
 import sys
 
 #Global Variables:
-GRID_SIZE = 4
+GRID_SIZE = 3
 INITIAL_BOARD = '.' *GRID_SIZE *GRID_SIZE
 WIN_SEQUENCES = [
-    [0,1,2,3],
-    [4,5,6,7],
-    [8,9,10,11],
-    [12,13,14,15],
-    [0,4,8,12],
-    [1,5,9,13],
-    [2,6,10,14],
-    [3,7,11,15],
-    [0,5,10,15],
-    [3,6,9,12],
+    [0,1,2],
+    [3,4,5],
+    [6,7,8],
+    [0,3,6],
+    [1,4,7],
+    [2,5,8],
+    [0,4,8],
+    [2,4,6]
 ]
+# WIN_SEQUENCES = [
+#     [0,1,2,3],
+#     [4,5,6,7],
+#     [8,9,10,11],
+#     [12,13,14,15],
+#     [0,4,8,12],
+#     [1,5,9,13],
+#     [2,6,10,14],
+#     [3,7,11,15],
+#     [0,5,10,15],
+#     [3,6,9,12],
+# ]
 
 #Functions
 def fail (msg):
@@ -73,12 +83,11 @@ def has_win (board):
     Return 'X' if it is a win for X, 'O' if it is a win for O, and False otherwise"""
     for sequence in WIN_SEQUENCES:
         total = sum(mark_value(board[pos]) for pos in sequence)
-    if total == 0:
-        return False
-    if total == 1*GRID_SIZE:
-        return 'O'
-    if total == 10*GRID_SIZE:
-        return 'X'
+        if total == 1*GRID_SIZE:
+            return 'O'
+        if total == 10*GRID_SIZE:
+            return 'X'
+    return False
 
 def is_full (board):
     """Checks if board is full"""
@@ -110,7 +119,7 @@ def is_string_valid(moveString):
 def is_move_valid(board, x, y):
     """Checks if move is valid on board(if the position is already taken). Throws error if false, or returns true
     if valid"""
-    mark = get_mark(board, x, y)
+    mark = get_mark(board, x + 1, y + 1)
     if mark != '.':
         fail('Position is already taken')
     else: return True
@@ -144,6 +153,7 @@ def main ():
         board = perform_player_move(board, 'X')
         print_board(board)
         #Plays computer input
+
 
 
 if __name__ == "__main__":

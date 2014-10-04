@@ -16,7 +16,7 @@ from graphics import *
 
 GRID_SIZE = 4
 INITIAL_BOARD = '.' *GRID_SIZE *GRID_SIZE
-BOARD_TEST = 'XO.XXXO....OOO..'
+BOARD_TEST = 'XO..XOX...O.OX..'
 # #Comment this out for playing with 4
 # WIN_SEQUENCES = [
 #     [0,1,2],
@@ -41,6 +41,15 @@ WIN_SEQUENCES = [
     [0,5,10,15],
     [3,6,9,12],
 ]
+MARK_VALUE = {
+    'O': 1,
+    '.': 0,
+    'X': 10
+}
+UTILITIES = {
+    'O': -1,
+    'X': 1
+}
 
 
 
@@ -49,15 +58,6 @@ WIN_SEQUENCES = [
 def fail (msg):
     """Graceful Fail with error message"""
     raise StandardError(msg)
-
-def mark_value (markString):
-    """Returns Mark Value of String. Value is used in detecting wins"""
-    markValue = {
-        'O': 1,
-        '.': 0,
-        'X': 10
-    }
-    return markValue[markString]
 
 def index_to_tuple(index):
     """Gets index and outputs coordinate in grid as a tuple"""
@@ -102,12 +102,12 @@ def has_win (board):
     """Checks if a board is a win for X or for O.
     Return 'X' if it is a win for X, 'O' if it is a win for O, and False otherwise"""
     for sequence in WIN_SEQUENCES:
-        total = sum(mark_value(board[pos]) for pos in sequence)
-        if total == 1*GRID_SIZE:
-            return 'O'
-        if total == 10*GRID_SIZE:
-            return 'X'
-    return False
+        if MARK_VALUE[board[sequence[0]]] == '.':
+            return False
+        for pos in range(GRID_SIZE - 1):
+            if MARK_VALUE[board[pos]] != MARK_VALUE[board[pos + 1]]:
+                return False
+        return True
 
 def is_full (board):
     """Checks if board is full"""
@@ -135,7 +135,17 @@ def make_move (board, move ,mark):
 
 def possible_moves (board):
     """#Returns list of possible moves in a given board"""
-    return [i for (i,e) in enumerate(board) if e == '.']
+
+    boardcopy = board[:]
+    possibleMoves = []
+    while '.' in boardcopy:
+        index = boardcopy.index('.')
+        possibleMoves.append(index)
+        boardcopy[index] = 'null'
+    return possibleMoves
+
+    #return [i for (i,e) in enumerate(board) if e == '.']
+
 
 
 
@@ -268,10 +278,9 @@ def when_clicked(View, Point):
 
 def utility (board):
     """Returns utility of final board state. Must pass in the final board state to be accurate"""
-    if has_win(board) == 'O':
-        return -1
-    elif has_win(board) == 'X':
-        return  1
+    win = has_win(board)
+    if win:
+        return UTILITIES[win]
     else:
         return 0
 
@@ -327,9 +336,9 @@ def best_move (board, player):
 def main ():
     """Main Game Loop"""
     #Creates and prints initial board
-    board = create_board(BOARD_TEST)
-    View = Display(board)
-    View.start_board(board)
+    board = create_board(BOARD_TEST) #Creates board from start sequence
+    View = Display(board) #Creates blank game board
+    View.start_board(board) #Fills board with start sequence
     #Start Sequence
     View.start_sequence()
     #Gets User input and prints new board
@@ -339,12 +348,12 @@ def main ():
         View.win.setMouseHandler(when_clicked(View, Point))
         #Plays computer input if game isn't over
         if not done(board):
-            moveIndex = best_move(board,'O')
-            moveTuple = index_to_tuple(moveIndex)
-            View.update_mark('O', moveTuple)
+            moveIndex = best_move(board,'O') #Gets best move index
+            moveTuple = index_to_tuple(moveIndex) #Converts index to tuple
+            View.update_mark('O', moveTuple) #Performs move on board
     #Checks who has won, and prints result
-    winner = has_win(board)
-    View.end_sequence(winner)
+    winner = has_win(board) #Gets winner
+    View.end_sequence(winner) #Displays win sequence
 
 if __name__ == "__main__":
     main()

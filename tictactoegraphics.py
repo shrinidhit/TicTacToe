@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 #Shrinidhi Thirumalai
-
 # Game Programming, Level 2 Project
 # TIC-TAC-TOE 4, with an AI implemented
 # A simple strategy game, an extension of the standard 3x3 tic-tac-toe
 
 
 #Imports:
+
 import sys
 from graphics import *
 
+
+
 #Global Variables:
+
 GRID_SIZE = 4
 INITIAL_BOARD = '.' *GRID_SIZE *GRID_SIZE
 BOARD_TEST = 'XO.XXXO....OOO..'
-
 # #Comment this out for playing with 4
 # WIN_SEQUENCES = [
 #     [0,1,2],
@@ -26,7 +28,6 @@ BOARD_TEST = 'XO.XXXO....OOO..'
 #     [0,4,8],
 #     [2,4,6]
 # ]
-
 #Comment this out for playing with 3
 WIN_SEQUENCES = [
     [0,1,2,3],
@@ -41,7 +42,10 @@ WIN_SEQUENCES = [
     [3,6,9,12],
 ]
 
-#Functions
+
+
+#Basic Set Up Functions:
+
 def fail (msg):
     """Graceful Fail with error message"""
     raise StandardError(msg)
@@ -123,6 +127,67 @@ def print_board (board):
             print '  ' + get_mark(board, column, row),
         print ''
 
+def make_move (board, move ,mark):
+    """returns a copy of the board with the move recorded"""
+    new_board = board[:]
+    new_board[move] = mark
+    return new_board
+
+def possible_moves (board):
+    """#Returns list of possible moves in a given board"""
+    return [i for (i,e) in enumerate(board) if e == '.']
+
+
+
+#Display Class:
+
+class Display(object):
+    """Class containing methods to group the pretty display for Game, using the graphics.py framework"""
+
+    def __init__(self, board):
+        """Displays an empty grid of given GRID_SIZE"""
+        # Initializations of Attributes:
+        self.board = board
+        self.coordMap =  {} # dictionary of coordinate pairs mapping to respective rectangles
+        self.win = GraphWin("graphicsTest", 600, 600) # names & sizes window (pixels)
+        self.win.setCoords( 0, GRID_SIZE + 2, GRID_SIZE + 2, 0 ) # makes coordinates un-ugly (the rectangle in (row1, column1) will have its top left-hand corner in (1,1), rectangle in (row3, column5) will have (3,5), etc.)
+        # draws empty rectangles/board
+        for i in range(1,GRID_SIZE + 1):
+            for j in range(1,GRID_SIZE + 1):
+                coord = (i,j) # coord of rectangle's top left-hand corner
+                rect = Rectangle(Point(i,j), Point(i+1,j+1))
+                self.coordMap[coord] = rect # ads coord:rect to dictionary (yay!)
+                rect.draw(self.win)
+
+    def update_mark(self, mark, coordinate):
+        """Draws a mark onto the grid, given it's mark and coordinate, and also returns updated board"""
+        #Draws onto display
+        x, y = coordinate
+        Mark = Text(Point(x,y), mark)
+        Mark.setSize(36)
+        Mark.move(.5, .5)
+        Mark.draw(self.win)
+        #Updates board list and returns it
+        index = tuple_to_index((x,y))
+        self.board[index] = mark
+        return self.board
+
+    def start_board(self, board):
+        """Creates starting display from a given board as a list"""
+        for x in range(1, GRID_SIZE + 1):
+            for y in range(1, GRID_SIZE + 1):
+                mark = get_mark(board, x, y)
+                if mark != '.':
+                    self.update_mark(mark, (x,y))
+
+    def click_to_string(self):
+        """Takes in click and outputs move as string"""
+        pass
+
+
+
+#Player Input Functions. Checking player input and performing move
+
 def is_string_valid(moveString):
     """Checks if a string input is valid. Row and Column are within grid range, and separated by a space.
     Returns true if valid, and all other inputs throw an error"""
@@ -157,16 +222,9 @@ def perform_player_move (board, player):
     if is_move_valid(board, x, y):
         return (x,y)
 
-def make_move (board, move ,mark):
-    """returns a copy of the board with the move recorded"""
-    new_board = board[:]
-    new_board[move] = mark
-    return new_board
 
-def possible_moves (board):
-    """#Returns list of possible moves in a given board"""
-    return [i for (i,e) in enumerate(board) if e == '.']
 
+#AI Functions. Minimax and Utilitis
 
 def utility (board):
     """Returns utility of final board state. Must pass in the final board state to be accurate"""
@@ -222,58 +280,20 @@ def best_move (board, player):
     else:
         return possibleDict[min(possibleDict)]
 
-#Display Class:
-class Display(object):
-    """Class containing methods to group the pretty display for Game, using the graphics.py framework"""
 
-    def __init__(self, board):
-        """Displays an empty grid of given GRID_SIZE"""
-        # Initializations of Attributes:
-        self.board = board
-        self.coordMap =  {} # dictionary of coordinate pairs mapping to respective rectangles
-        self.win = GraphWin("graphicsTest", 600, 600) # names & sizes window (pixels)
-        self.win.setCoords( 0, GRID_SIZE + 2, GRID_SIZE + 2, 0 ) # makes coordinates un-ugly (the rectangle in (row1, column1) will have its top left-hand corner in (1,1), rectangle in (row3, column5) will have (3,5), etc.)
-        # draws empty rectangles/board
-        for i in range(1,GRID_SIZE + 1):
-            for j in range(1,GRID_SIZE + 1):
-                coord = (i,j) # coord of rectangle's top left-hand corner
-                rect = Rectangle(Point(i,j), Point(i+1,j+1))
-                self.coordMap[coord] = rect # ads coord:rect to dictionary (yay!)
-                rect.draw(self.win)
 
-    def update_mark(self, mark, coordinate):
-        """Draws a mark onto the grid, given it's mark and coordinate, and also returns updated board"""
-        #Draws onto display
-        x, y = coordinate
-        Mark = Text(Point(x,y), mark)
-        Mark.setSize(36)
-        Mark.move(.5, .5)
-        Mark.draw(self.win)
-        #Updates board list and returns it
-        index = tuple_to_index((x,y))
-        self.board[index] = mark
-        return self.board
-
-    def start_board(self, board):
-        """Creates starting display from a given board as a list"""
-        for x in range(1, GRID_SIZE + 1):
-            for y in range(1, GRID_SIZE + 1):
-                mark = get_mark(board, x, y)
-                if mark != '.':
-                    self.update_mark(mark, (x,y))
+#Main Game Sequence:
 
 def main ():
     """Main Game Loop"""
     #Creates and prints initial board
     board = create_board(BOARD_TEST)
-    print_board(board)
     View = Display(board)
     View.start_board(board)
     #Gets User input and prints new board
     while not done(board):
         moveTuple = perform_player_move(board, 'X')
         board = View.update_mark('X', moveTuple)
-        print_board(board)
         #Plays computer input if game isn't over
         if not done(board):
             moveIndex = best_move(board,'O')
@@ -281,7 +301,6 @@ def main ():
             moveTuple = index_to_tuple(moveIndex)
             print 'Computer moves to', moveTuple
             board = View.update_mark('O', moveTuple)
-            print_board(board)
     #Checks who has won, and prints result
     winner = has_win(board)
     if winner:

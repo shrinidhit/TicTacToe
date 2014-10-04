@@ -70,8 +70,6 @@ def tuple_to_index(coordinate):
 def create_board (boardString):
     """Take a description of the board a string input( a sequence of X's, O's, and .s )
     and outputs the board as a list of letters. 'X' is player X, '.' is a space, and 'O' is Player O"""
-    # The string description is a sequence of Grid size times Grid size characters,
-    #   each either X or O, or . to represent a free space
     # It is allowed to pass in a string describing a board
     #   that would never arise in legal play starting from an empty board
     board = []
@@ -210,7 +208,6 @@ def max_value (board):
 def best_move (board, player):
     """Returns the best move possible, given a player input"""
     possibleDict = {} #Dictionary of all possible move results with the utility as the key and the move as the value
-    
     #Loops through player's move options and adds to dictionary possibleDict
     for move in possible_moves(board):
         newBoard = make_move(board, move, player)
@@ -225,18 +222,17 @@ def best_move (board, player):
     else:
         return possibleDict[min(possibleDict)]
 
-#Classes:
+#Display Class:
 class Display(object):
     """Class containing methods to group the pretty display for Game, using the graphics.py framework"""
 
     def __init__(self, board):
-        """Displays an empty six by six grid"""
+        """Displays an empty grid of given GRID_SIZE"""
         # Initializations of Attributes:
         self.board = board
         self.coordMap =  {} # dictionary of coordinate pairs mapping to respective rectangles
         self.win = GraphWin("graphicsTest", 600, 600) # names & sizes window (pixels)
         self.win.setCoords( 0, GRID_SIZE + 2, GRID_SIZE + 2, 0 ) # makes coordinates un-ugly (the rectangle in (row1, column1) will have its top left-hand corner in (1,1), rectangle in (row3, column5) will have (3,5), etc.)
-            
         # draws empty rectangles/board
         for i in range(1,GRID_SIZE + 1):
             for j in range(1,GRID_SIZE + 1):
@@ -246,16 +242,20 @@ class Display(object):
                 rect.draw(self.win)
 
     def update_mark(self, mark, coordinate):
+        """Draws a mark onto the grid, given it's mark and coordinate, and also returns updated board"""
+        #Draws onto display
         x, y = coordinate
         Mark = Text(Point(x,y), mark)
         Mark.setSize(36)
         Mark.move(.5, .5)
         Mark.draw(self.win)
+        #Updates board list and returns it
         index = tuple_to_index((x,y))
         self.board[index] = mark
         return self.board
 
     def start_board(self, board):
+        """Creates starting display from a given board as a list"""
         for x in range(1, GRID_SIZE + 1):
             for y in range(1, GRID_SIZE + 1):
                 mark = get_mark(board, x, y)

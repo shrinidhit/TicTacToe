@@ -10,30 +10,35 @@
 import sys
 
 #Global Variables:
-GRID_SIZE = 3
+GRID_SIZE = 4
 INITIAL_BOARD = '.' *GRID_SIZE *GRID_SIZE
-WIN_SEQUENCES = [
-    [0,1,2],
-    [3,4,5],
-    [6,7,8],
-    [0,3,6],
-    [1,4,7],
-    [2,5,8],
-    [0,4,8],
-    [2,4,6]
-]
+BOARD_TEST = 'XO.XXXO....OOO..'
+
+# #Comment this out for playing with 4
 # WIN_SEQUENCES = [
-#     [0,1,2,3],
-#     [4,5,6,7],
-#     [8,9,10,11],
-#     [12,13,14,15],
-#     [0,4,8,12],
-#     [1,5,9,13],
-#     [2,6,10,14],
-#     [3,7,11,15],
-#     [0,5,10,15],
-#     [3,6,9,12],
+#     [0,1,2],
+#     [3,4,5],
+#     [6,7,8],
+#     [0,3,6],
+#     [1,4,7],
+#     [2,5,8],
+#     [0,4,8],
+#     [2,4,6]
 # ]
+
+#Comment this out for playing with 3
+WIN_SEQUENCES = [
+    [0,1,2,3],
+    [4,5,6,7],
+    [8,9,10,11],
+    [12,13,14,15],
+    [0,4,8,12],
+    [1,5,9,13],
+    [2,6,10,14],
+    [3,7,11,15],
+    [0,5,10,15],
+    [3,6,9,12],
+]
 
 #Functions
 def fail (msg):
@@ -212,7 +217,7 @@ def best_move (board, player):
 def main ():
     """Main Game Loop"""
     #Creates and prints initial board
-    board = create_board(INITIAL_BOARD)
+    board = create_board(BOARD_TEST)
     print_board(board)
     #Gets User input and prints new board
     while not done(board):

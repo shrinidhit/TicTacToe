@@ -143,6 +143,72 @@ def perform_player_move (board, player):
         board = perform_move(board, movePos, player)
         return board
 
+def make_move (board, move ,mark):
+    """returns a copy of the board with the move recorded"""
+    new_board = board[:]
+    new_board[move] = mark
+    return new_board
+
+def possible_moves (board):
+    """#Returns list of possible moves in a given board"""
+    return [i for (i,e) in enumerate(board) if e == '.']
+
+
+def utility (board):
+    """Returns utility of final board state. Must pass in the final board state to be accurate"""
+    if has_win(board) == 'O':
+        return -1
+    elif has_win(board) == 'X':
+        return  1
+    else:
+        return 0
+
+def min_value (board):
+    """Returns the minimum utility possible after a single move"""
+    possibleUtilities = []
+    #Checks if game is over and returns utility
+    if done(board):
+        return utility(board)
+    #Else, gets possible moves and moves one move down to repeat
+    possibleMoves = possible_moves(board)
+    for move in possible_moves(board):
+        newBoard = make_move(board, move, 'O')
+        possibleUtilities.append(max_value(newBoard))
+    #returns minimum utility
+    return min(possibleUtilities)
+
+def max_value (board):
+    possibleUtilities = []
+    """Returns the maximum utility possible after a single move"""
+    #Checks if game is over, and returns utility
+    if done(board):
+        return utility(board)
+    #Else, gets possible moves and moves one move down to repeat
+    possibleMoves = possible_moves(board)
+    for move in possible_moves(board):
+        newBoard = make_move(board, move, 'X')
+        possibleUtilities.append(min_value(newBoard))
+    #returns maximum utility
+    return max(possibleUtilities)
+
+def best_move (board, player):
+    """Returns the best move possible, given a player input"""
+    possibleDict = {} #Dictionary of all possible move results with the utility as the key and the move as the value
+    
+    #Loops through player's move options and adds to dictionary possibleDict
+    for move in possible_moves(board):
+        newBoard = make_move(board, move, player)
+        if player == 'X':
+            value = min_value(newBoard)
+        if player == 'O':
+            value = max_value(newBoard)
+        possibleDict[value] = move
+    #Returns best move option for player. Returns move with max utility for X and move with lowest utility for Y
+    if player == 'X':
+        return possibleDict[max(possibleDict)]
+    else:
+        return possibleDict[min(possibleDict)]
+
 def main ():
     """Main Game Loop"""
     #Creates and prints initial board
@@ -152,9 +218,18 @@ def main ():
     while not done(board):
         board = perform_player_move(board, 'X')
         print_board(board)
-        #Plays computer input
-
-
+        #Plays computer input if game isn't over
+        if not done(board):
+            move = best_move(board,'O')
+            print 'Computer moves to',move
+            board[move] = 'O'
+            print_board(board)
+    #Checks who has won, and prints result
+    winner = has_win(board)
+    if winner:
+        print winner,'wins!'
+    else:
+        print 'Draw'
 
 if __name__ == "__main__":
     main()

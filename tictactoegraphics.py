@@ -9,6 +9,7 @@
 
 import sys
 from graphics import *
+import numpy
 
 
 
@@ -16,7 +17,7 @@ from graphics import *
 
 GRID_SIZE = 4
 INITIAL_BOARD = '.' *GRID_SIZE *GRID_SIZE
-BOARD_TEST = 'XO..XOX...O.OX..'
+BOARD_TEST = '.............X..'
 # #Comment this out for playing with 4
 # WIN_SEQUENCES = [
 #     [0,1,2],
@@ -50,6 +51,7 @@ UTILITIES = {
     'O': -1,
     'X': 1
 }
+CACHE = {}
 
 
 
@@ -102,12 +104,15 @@ def has_win (board):
     """Checks if a board is a win for X or for O.
     Return 'X' if it is a win for X, 'O' if it is a win for O, and False otherwise"""
     for sequence in WIN_SEQUENCES:
-        if MARK_VALUE[board[sequence[0]]] == '.':
-            return False
-        for pos in range(GRID_SIZE - 1):
-            if MARK_VALUE[board[pos]] != MARK_VALUE[board[pos + 1]]:
-                return False
-        return True
+        if board[sequence[0]] != '.':
+            pos = 0
+            while MARK_VALUE[board[sequence[pos]]] == MARK_VALUE[board[sequence[pos + 1]]]:
+                if pos == GRID_SIZE - 2:
+                    return board[sequence[pos]]
+                else:
+                    pos += 1 
+    return False
+                
 
 def is_full (board):
     """Checks if board is full"""
@@ -135,18 +140,17 @@ def make_move (board, move ,mark):
 
 def possible_moves (board):
     """#Returns list of possible moves in a given board"""
-
-    boardcopy = board[:]
-    possibleMoves = []
-    while '.' in boardcopy:
-        index = boardcopy.index('.')
-        possibleMoves.append(index)
-        boardcopy[index] = 'null'
-    return possibleMoves
-
-    #return [i for (i,e) in enumerate(board) if e == '.']
+    return [i for (i,e) in enumerate(board) if e == '.']
 
 
+#Caching Functions:
+def board_to_string(board, name):
+    return ''.join(board) + name
+def rotate_left(board):
+    pass
+def add_to_cache(board, utility, name):
+    boardString = board_to_string(board, name)
+    CACHE[boardString] = utility
 
 
 #Display Class:
@@ -287,30 +291,46 @@ def utility (board):
 def min_value (board):
     """Returns the minimum utility possible after a single move"""
     possibleUtilities = []
+    #Checking if it's already in cache
+    boardString = board_to_string(board, "min")
+    if boardString in CACHE:
+        return CACHE[boardString]
     #Checks if game is over and returns utility
     if done(board):
-        return utility(board)
+        value = utility(board)
+        CACHE[boardString] = value
+        return value
     #Else, gets possible moves and moves one move down to repeat
     possibleMoves = possible_moves(board)
     for move in possible_moves(board):
         newBoard = make_move(board, move, 'O')
         possibleUtilities.append(max_value(newBoard))
     #returns minimum utility
-    return min(possibleUtilities)
+    value = min(possibleUtilities)
+    CACHE[boardString] = value
+    return value
 
 def max_value (board):
-    possibleUtilities = []
     """Returns the maximum utility possible after a single move"""
+    possibleUtilities = []
+    #Checking if it's already in cache
+    boardString = board_to_string(board, "max")
+    if boardString in CACHE:
+        return CACHE[boardString]
     #Checks if game is over, and returns utility
     if done(board):
-        return utility(board)
+        value = utility(board)
+        CACHE[boardString] = value
+        return value
     #Else, gets possible moves and moves one move down to repeat
     possibleMoves = possible_moves(board)
     for move in possible_moves(board):
         newBoard = make_move(board, move, 'X')
         possibleUtilities.append(min_value(newBoard))
     #returns maximum utility
-    return max(possibleUtilities)
+    value = max(possibleUtilities)
+    CACHE[boardString] = value
+    return value
 
 def best_move (board, player):
     """Returns the best move possible, given a player input"""

@@ -4,8 +4,8 @@ import cProfile
 import pstats
 
 def minmax():
-	board = create_board(BOARD_TEST)
-	for i in range(10):
+	board = create_board(INITIAL_BOARD)
+	for i in range(1):
 		moveIndex = best_move(board,'O')
 
 def profile_test():

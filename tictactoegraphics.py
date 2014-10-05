@@ -304,7 +304,12 @@ def min_value (board):
     possibleMoves = possible_moves(board)
     for move in possible_moves(board):
         newBoard = make_move(board, move, 'O')
-        possibleUtilities.append(max_value(newBoard))
+        tempValue = max_value(newBoard)
+        #Pruning:
+        if tempValue == -1:
+            CACHE[boardString] = tempValue
+            return tempValue
+        possibleUtilities.append(tempValue)
     #returns minimum utility
     value = min(possibleUtilities)
     CACHE[boardString] = value
@@ -326,7 +331,12 @@ def max_value (board):
     possibleMoves = possible_moves(board)
     for move in possible_moves(board):
         newBoard = make_move(board, move, 'X')
-        possibleUtilities.append(min_value(newBoard))
+        tempValue = min_value(newBoard)
+        #Pruning:
+        if tempValue == 1:
+            CACHE[boardString] = tempValue
+            return tempValue
+        possibleUtilities.append(tempValue)
     #returns maximum utility
     value = max(possibleUtilities)
     CACHE[boardString] = value

@@ -19,8 +19,6 @@ from random import choice
 GRID_SIZE = 4
 INITIAL_BOARD = '.' *GRID_SIZE *GRID_SIZE
 BOARD_TEST = '..............OX'
-BOARD_TEST2 = '1234567812345678'
-
 #Uncomment this section for a 4 by 4 game
 WIN_SEQUENCES = [
     [0,1,2,3],
@@ -79,8 +77,6 @@ def tuple_to_index(coordinate):
 def create_board (boardString):
     """Take a description of the board a string input( a sequence of X's, O's, and .s )
     and outputs the board as a list of letters. 'X' is player X, '.' is a space, and 'O' is Player O"""
-    # It is allowed to pass in a string describing a board
-    #   that would never arise in legal play starting from an empty board
     board = []
     boardLength = GRID_SIZE * GRID_SIZE
     for i in range(boardLength):
@@ -145,11 +141,15 @@ def possible_moves (board):
     return [i for (i,e) in enumerate(board) if e == '.']
 
 
+
 #Caching Functions:
 
+#Converts board to string
 def board_to_string(board, name):
+    """Converts board to a string, plus whether it's a min or max. 
+    Input in (board,name) where name = "min" or "max"""
     return ''.join(board) + name
-    #Rotaters
+#Rotaters
 def flip_vert(boardString):
     """Flips a boardString on the vertical axis"""
     boardString = boardString[0:16]
@@ -161,6 +161,7 @@ def rotate_down(boardString):
     newString = [(boardString[row*GRID_SIZE:(row+1)*GRID_SIZE])[::-1] for row in reversed(range(GRID_SIZE))]
     print newString
     print "".join(newString)
+#Adding board and rotated boards to cache
 def add_to_cache(board, utility, name):
     """Given a board, this adds the board and it's rotations to the cache"""
     boardString = board_to_string(board, name)
@@ -173,9 +174,6 @@ def add_to_cache(board, utility, name):
     CACHE[downString] = utility
     CACHE[flipString] = utility
 
-def test(board):
-    boardString = board_to_string(board, 'min')
-    print rotate_down(boardString)
 
 
 #Display Class:
@@ -250,7 +248,6 @@ class Display(object):
         Wintext.draw(self.win)
         self.win.getMouse()
         self.win.close()
-
 
 
 
@@ -416,4 +413,3 @@ def main ():
 
 if __name__ == "__main__":
     main()
-    #test(BOARD_TEST2)

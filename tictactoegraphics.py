@@ -10,6 +10,7 @@
 import sys
 from graphics import *
 import numpy
+from random import choice
 
 
 
@@ -17,19 +18,10 @@ import numpy
 
 GRID_SIZE = 4
 INITIAL_BOARD = '.' *GRID_SIZE *GRID_SIZE
-BOARD_TEST = '.............X..'
-# #Comment this out for playing with 4
-# WIN_SEQUENCES = [
-#     [0,1,2],
-#     [3,4,5],
-#     [6,7,8],
-#     [0,3,6],
-#     [1,4,7],
-#     [2,5,8],
-#     [0,4,8],
-#     [2,4,6]
-# ]
-#Comment this out for playing with 3
+BOARD_TEST = '..............OX'
+BOARD_TEST2 = '1234567812345678'
+
+#Uncomment this section for a 4 by 4 game
 WIN_SEQUENCES = [
     [0,1,2,3],
     [4,5,6,7],
@@ -42,6 +34,17 @@ WIN_SEQUENCES = [
     [0,5,10,15],
     [3,6,9,12],
 ]
+# #Uncomment this section for a 3 by 3 Grid
+# WIN_SEQUENCES = [
+#     [0,1,2],
+#     [3,4,5],
+#     [6,7,8],
+#     [0,3,6],
+#     [1,4,7],
+#     [2,5,8],
+#     [0,4,8],
+#     [2,4,6]
+# ]
 MARK_VALUE = {
     'O': 1,
     '.': 0,
@@ -90,12 +93,12 @@ def get_mark (board,x,y):
     index = tuple_to_index((x,y))
     return board[index]
 
-def get_row (board, row):
+def get_row (row):
     """Returns positions of a row as a list"""
     indexes = range((row-1)*GRID_SIZE, (row-1)*GRID_SIZE + GRID_SIZE)
     return indexes
 
-def get_column (board, col):
+def get_column (col):
     """Returns positions of a column as a list"""
     indexes = range(col-1, GRID_SIZE*GRID_SIZE, GRID_SIZE)
     return indexes
@@ -113,7 +116,6 @@ def has_win (board):
                     pos += 1 
     return False
                 
-
 def is_full (board):
     """Checks if board is full"""
     if '.' not in board:
@@ -144,13 +146,36 @@ def possible_moves (board):
 
 
 #Caching Functions:
+
 def board_to_string(board, name):
     return ''.join(board) + name
-def rotate_left(board):
-    pass
+    #Rotaters
+def flip_vert(boardString):
+    """Flips a boardString on the vertical axis"""
+    boardString = boardString[0:16]
+    newString = [boardString[row*GRID_SIZE:(row+1)*GRID_SIZE] for row in reversed(range(GRID_SIZE))]
+    print "".join(newString)
+def rotate_down(boardString):
+    """Rotates a board twice"""
+    boardString = boardString[0:16]
+    newString = [(boardString[row*GRID_SIZE:(row+1)*GRID_SIZE])[::-1] for row in reversed(range(GRID_SIZE))]
+    print newString
+    print "".join(newString)
 def add_to_cache(board, utility, name):
+    """Given a board, this adds the board and it's rotations to the cache"""
     boardString = board_to_string(board, name)
+    #Adding original board to cache
+    global CACHE
     CACHE[boardString] = utility
+    #Rotating boards and adding to Caches
+    downString = rotate_down(boardString)
+    flipString = flip_vert(boardString)
+    CACHE[downString] = utility
+    CACHE[flipString] = utility
+
+def test(board):
+    boardString = board_to_string(board, 'min')
+    print rotate_down(boardString)
 
 
 #Display Class:
@@ -278,7 +303,7 @@ def when_clicked(View, Point):
 
 
 
-#AI Functions. Minimax and Utilitis
+#AI Functions. Minimax and Utilities
 
 def utility (board):
     """Returns utility of final board state. Must pass in the final board state to be accurate"""
@@ -346,7 +371,10 @@ def best_move (board, player):
     """Returns the best move possible, given a player input"""
     possibleDict = {} #Dictionary of all possible move results with the utility as the key and the move as the value
     #Loops through player's move options and adds to dictionary possibleDict
-    for move in possible_moves(board):
+    possibleMoves = possible_moves(board)
+    if len(possibleMoves) >=15:
+        return choice(possibleMoves)
+    for move in possibleMoves:
         newBoard = make_move(board, move, player)
         if player == 'X':
             value = min_value(newBoard)
@@ -366,7 +394,7 @@ def best_move (board, player):
 def main ():
     """Main Game Loop"""
     #Creates and prints initial board
-    board = create_board(BOARD_TEST) #Creates board from start sequence
+    board = create_board(INITIAL_BOARD) #Creates board from start sequence
     View = Display(board) #Creates blank game board
     View.start_board(board) #Fills board with start sequence
     #Start Sequence
@@ -385,5 +413,7 @@ def main ():
     winner = has_win(board) #Gets winner
     View.end_sequence(winner) #Displays win sequence
 
+
 if __name__ == "__main__":
     main()
+    #test(BOARD_TEST2)
